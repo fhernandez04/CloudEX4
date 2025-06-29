@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: books-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api/books/get(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: books-get-service
+                port:
+                  number: 80
+
+          - path: /api/books/post(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: books-post-service
+                port:
+                  number: 80
+
+          - path: /api/books/put(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: books-put-service
+                port:
+                  number: 80
+
+          - path: /api/books/delete(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: books-delete-service
+                port:
+                  number: 80
+
+          - path: /()(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: books-frontend-service
+                port:
+                  number: 80
