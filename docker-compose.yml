@@ -1,0 +1,151 @@
+version: '3.8'
+
+# Docker Compose file for a microservices architecture with NGINX and MongoDB
+
+# Cada microservicio (`get`, `post`, `put`, `delete`, `homepage`) tiene su propio contenedor y Dockerfile.
+# Todos los servicios usan la misma base de datos MongoDB, que se inicializa con usuario y contraseña en GET,
+# por esto el get es una condición para los demás servicios en el depends_on.
+# NGINX actúa como reverse proxy y expone el sistema en el puerto 8080 del host, redirigiendo las peticiones
+# al contenedor correspondiente.
+# Los datos de MongoDB se guardan en un volumen persistente llamado `mongo_data`.
+
+# La diferencia principal entre `expose` y `ports` en Docker Compose es:
+
+# expose:  
+#  - Hace que el puerto sea accesible **solo para otros contenedores de la misma red interna de Docker**.
+#  - No expone el puerto al host (tu máquina), es decir, **no puedes acceder desde fuera de Docker**.
+#  - Es útil cuando solo necesitas que los servicios se comuniquen entre sí, por ejemplo, cuando NGINX hace de proxy interno.
+
+# ports:  
+#  - Expone el puerto del contenedor **al host** (tu máquina), permitiendo el acceso desde fuera de Docker.
+#  - Ejemplo: `ports: - "3030:3030"` permite que accedas a ese servicio en `localhost:3030`.
+
+
+services:
+  homepage:
+    environment:
+      - DATABASE_URI=mongodb://mongodb:testmongo@mongodb:27017/mydb?authSource=admin
+    depends_on:
+      - mongodb
+      - get
+
+    # version con dockerfile
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.frontend
+    
+    #version con imagen en Docker Hub
+    image: fhernandez004/books_frontend:latest 
+
+    expose:
+      - "3030"
+    restart: unless-stopped  
+    # Reinicia automáticamente si falla, a menos que se haga manualmente
+
+  get:
+    environment:
+      - DATABASE_URI=mongodb://mongodb:testmongo@mongodb:27017/mydb?authSource=admin
+    depends_on:
+      - mongodb
+
+    # version con dockerfile
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.get
+    
+    #version con imagen en Docker Hub
+    image: fhernandez004/books_get:latest
+
+    expose:
+      - "3030"
+    restart: unless-stopped  
+    # Reinicia automáticamente si falla, a menos que se haga manualmente
+
+  post:
+    environment:
+      - DATABASE_URI=mongodb://mongodb:testmongo@mongodb:27017/mydb?authSource=admin
+    depends_on:
+      - mongodb
+      - get
+
+    # version con dockerfile
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.post
+    
+    #version con imagen en Docker Hub
+    image: fhernandez004/books_post:latest 
+
+    expose:
+      - "3030"
+    restart: unless-stopped  
+    # Reinicia automáticamente si falla, a menos que se haga manualmente
+
+  put:
+    environment:
+      - DATABASE_URI=mongodb://mongodb:testmongo@mongodb:27017/mydb?authSource=admin
+    depends_on:
+      - mongodb
+      - get
+
+    # version con dockerfile
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.frontend
+    
+    #version con imagen en Docker Hub
+    image: fhernandez004/books_put:latest
+
+    expose:
+      - "3030"
+    restart: unless-stopped  
+    # Reinicia automáticamente si falla, a menos que se haga manualmente
+
+  delete:
+    environment:
+      - DATABASE_URI=mongodb://mongodb:testmongo@mongodb:27017/mydb?authSource=admin
+    depends_on:
+      - mongodb
+      - get
+
+    # version con dockerfile
+    #build:
+    #  context: .
+    #  dockerfile: Dockerfile.frontend
+    
+    #version con imagen en Docker Hub
+    image: fhernandez004/books_delete:latest
+
+    expose:
+      - "3030"
+    restart: unless-stopped  
+    # Reinicia automáticamente si falla, a menos que se haga manualmente
+
+  nginx:
+    image: nginx:latest
+    depends_on:
+      - homepage
+      - get
+      - post
+      - put
+      - delete
+    ports:
+      - "8080:3030"   # Aquí expone el puerto 3030 del contenedor NGINX al 8080 del host
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped  
+    # Reinicia automáticamente si falla, a menos que se haga manualmente
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongodb
+      MONGO_INITDB_ROOT_PASSWORD: testmongo
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
