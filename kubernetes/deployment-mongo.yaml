@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6
+          # You can also use IfNotPresent but it might lead to old images
+          imagePullPolicy: "Always"
+          env:
+            - name: TZ
+              value: Europe/Berlin
+          ports:
+            - containerPort: 27017

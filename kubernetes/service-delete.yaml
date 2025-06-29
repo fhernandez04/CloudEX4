@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: books-delete-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: books-delete-endpoint
+      port: 80
+      targetPort: 3030
+      protocol: TCP
+  selector:
+    app: books-delete

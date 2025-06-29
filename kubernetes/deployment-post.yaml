@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: books-post
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: books-post
+  template:
+    metadata:
+      labels:
+        app: books-post
+    spec:
+      containers:
+        - name: books-post
+          image: fhernandez004/books_post:latest
+          # You can also use IfNotPresent but it might lead to old images
+          imagePullPolicy: "Always"
+          env:
+            - name: TZ
+              value: Europe/Berlin
+            - name: DATABASE_URI
+              value: "mongodb://mongo-service:27017"
+          ports:
+            - containerPort: 3030
