@@ -3,47 +3,52 @@ kind: Ingress
 metadata:
   name: books-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
-    - http:
-        paths:
-          - path: /api/books/get(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: books-get-service
-                port:
-                  number: 80
+  - http:
+      paths:
+      # Frontend (HTML rendering)
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
 
-          - path: /api/books/post(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: books-post-service
-                port:
-                  number: 80
+      # GET microservice
+      - path: /api/get/books
+        pathType: Prefix
+        backend:
+          service:
+            name: books-get-service
+            port:
+              number: 80
 
-          - path: /api/books/put(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: books-put-service
-                port:
-                  number: 80
+      # POST microservice
+      - path: /api/post/books
+        pathType: Prefix
+        backend:
+          service:
+            name: books-post-service
+            port:
+              number: 80
 
-          - path: /api/books/delete(/|$)(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: books-delete-service
-                port:
-                  number: 80
+      # PUT microservice
+      - path: /api/put/books
+        pathType: Prefix
+        backend:
+          service:
+            name: books-put-service
+            port:
+              number: 80
 
-          - path: /()(.*)
-            pathType: Prefix
-            backend:
-              service:
-                name: books-frontend-service
-                port:
-                  number: 80
+      # DELETE microservice
+      - path: /api/delete/books
+        pathType: Prefix
+        backend:
+          service:
+            name: books-delete-service
+            port:
+              number: 80
