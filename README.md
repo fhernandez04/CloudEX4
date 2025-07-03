@@ -121,7 +121,7 @@ sudo sysctl --system
 Once you this process finishes, then you can install containerd via:
 
 ```bash
-sudo apt-get isntall -y containerd.io containernetworking-plugins
+sudo apt-get install -y containerd.io containernetworking-plugins
 ```
 
 Once containerd has been installed, you need to configure it via:
