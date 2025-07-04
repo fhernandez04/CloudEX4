@@ -4,51 +4,30 @@ metadata:
   name: books-ingress
   annotations:
     kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      location /api/books {
+        if ($request_method = GET) {
+          proxy_pass http://books-get-service;
+        }
+        if ($request_method = POST) {
+          proxy_pass http://books-post-service;
+        }
+        if ($request_method = PUT) {
+          proxy_pass http://books-put-service;
+        }
+        if ($request_method = DELETE) {
+          proxy_pass http://books-delete-service;
+        }
+      }
 spec:
   rules:
   - http:
       paths:
-      # Frontend (HTML rendering)
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend-service
-            port:
-              number: 80
-
-      # GET microservice
-      - path: /api/get/books
-        pathType: Prefix
-        backend:
-          service:
-            name: books-get-service
-            port:
-              number: 80
-
-      # POST microservice
-      - path: /api/post/books
-        pathType: Prefix
-        backend:
-          service:
-            name: books-post-service
-            port:
-              number: 80
-
-      # PUT microservice
-      - path: /api/put/books
-        pathType: Prefix
-        backend:
-          service:
-            name: books-put-service
-            port:
-              number: 80
-
-      # DELETE microservice
-      - path: /api/delete/books
-        pathType: Prefix
-        backend:
-          service:
-            name: books-delete-service
-            port:
-              number: 80
+        # Frontend (HTML rendering)
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: frontend-service
+              port:
+                number: 80
