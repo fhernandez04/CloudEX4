@@ -23,13 +23,12 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: 20.54.81.54
-      http:
+    - http:
         paths:
           - path: /api/books
             pathType: Prefix
             backend:
               service:
-                name: placeholder-service  # nunca se usará realmente
+                name: placeholder-service
                 port:
                   number: 8080
