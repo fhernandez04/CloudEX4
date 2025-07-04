@@ -1,24 +1,62 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ingress-rules
+  name: nginx-templates
   namespace: default
 data:
-  server-snippet: |
-    location /api/books {
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-      
-      if ($request_method = GET) {
-        proxy_pass http://books-get-service.default.svc.cluster.local:8080;
+  main-template: |
+    worker_processes {{.WorkerProcesses}};
+    worker_rlimit_nofile {{.MaxWorkerOpenFiles}};
+
+    events {
+      worker_connections {{.MaxWorkerConnections}};
+      multi_accept on;
+    }
+
+    http {
+      include /etc/nginx/mime.types;
+      default_type application/octet-stream;
+
+      log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+      access_log /var/log/nginx/access.log main;
+      error_log /var/log/nginx/error.log notice;
+
+      sendfile on;
+      tcp_nopush on;
+      tcp_nodelay on;
+
+      keepalive_timeout 65;
+      types_hash_max_size 2048;
+      server_names_hash_bucket_size 128;
+
+      include /etc/nginx/conf.d/*.conf;
+
+      # Configuración para enrutamiento por métodos HTTP
+      map $request_method $backend_service {
+        GET     books-get-service.default.svc.cluster.local:8080;
+        POST    books-post-service.default.svc.cluster.local:8080;
+        PUT     books-put-service.default.svc.cluster.local:8080;
+        DELETE  books-delete-service.default.svc.cluster.local:8080;
+        default books-get-service.default.svc.cluster.local:8080;
       }
-      if ($request_method = POST) {
-        proxy_pass http://books-post-service.default.svc.cluster.local:8080;
+    }
+
+  ingress-template: |
+    server {
+      listen 80;
+      server_name _;
+
+      location / {
+        proxy_pass http://books-frontend-service.default.svc.cluster.local:8080;
       }
-      if ($request_method = PUT) {
-        proxy_pass http://books-put-service.default.svc.cluster.local:8080;
-      }
-      if ($request_method = DELETE) {
-        proxy_pass http://books-delete-service.default.svc.cluster.local:8080;
+
+      location /api/books {
+        proxy_pass http://$backend_service;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
       }
     }
