@@ -3,31 +3,41 @@ kind: Ingress
 metadata:
   name: books-ingress
   annotations:
+    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/server-snippet: |
+      location / {
+        proxy_pass http://books-frontend-service:8080;
+      }
+      
       location /api/books {
         if ($request_method = GET) {
-          proxy_pass http://books-get-service.default.svc.cluster.local:8080;
+          proxy_pass http://books-get-service:8080;
         }
         if ($request_method = POST) {
-          proxy_pass http://books-post-service.default.svc.cluster.local:8080;
+          proxy_pass http://books-post-service:8080;
         }
         if ($request_method = PUT) {
-          proxy_pass http://books-put-service.default.svc.cluster.local:8080;
+          proxy_pass http://books-put-service:8080;
         }
         if ($request_method = DELETE) {
-          proxy_pass http://books-delete-service.default.svc.cluster.local:8080;
+          proxy_pass http://books-delete-service:8080;
         }
       }
 spec:
-  ingressClassName: nginx
   rules:
-    - host: books.local
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: books-frontend-service
-                port:
-                  number: 8080
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: books-frontend-service  # Solo como placeholder
+            port:
+              number: 8080
+      - path: /api/books
+        pathType: Prefix
+        backend:
+          service:
+            name: books-get-service  # Solo como placeholder
+            port:
+              number: 8080
