@@ -1,34 +1,24 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: books-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/server-snippet: |
-      location /api/books {
-        if ($request_method = GET) {
-          proxy_pass http://get-service.default.svc.cluster.local:8080;
-        }
-        if ($request_method = POST) {
-          proxy_pass http://post-service.default.svc.cluster.local:8080;
-        }
-        if ($request_method = PUT) {
-          proxy_pass http://put-service.default.svc.cluster.local:8080;
-        }
-        if ($request_method = DELETE) {
-          proxy_pass http://delete-service.default.svc.cluster.local:8080;
-        }
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
+  name: ingress-rules
+  namespace: default
+data:
+  server-snippet: |
+    location /api/books {
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      
+      if ($request_method = GET) {
+        proxy_pass http://books-get-service.default.svc.cluster.local:8080;
       }
-spec:
-  ingressClassName: nginx
-  rules:
-    - http:
-        paths:
-          - path: /api/books
-            pathType: Prefix
-            backend:
-              service:
-                name: placeholder-service
-                port:
-                  number: 8080
+      if ($request_method = POST) {
+        proxy_pass http://books-post-service.default.svc.cluster.local:8080;
+      }
+      if ($request_method = PUT) {
+        proxy_pass http://books-put-service.default.svc.cluster.local:8080;
+      }
+      if ($request_method = DELETE) {
+        proxy_pass http://books-delete-service.default.svc.cluster.local:8080;
+      }
+    }
