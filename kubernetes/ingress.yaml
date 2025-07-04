@@ -21,13 +21,13 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: books.local
-    http:
-      paths:
-        - path: /
-          pathType: Prefix
-          backend:
-            service:
-              name: books-frontend-service
-              port:
-                number: 8080
+    - host: books.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: books-frontend-service
+                port:
+                  number: 8080
