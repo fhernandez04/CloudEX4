@@ -6,7 +6,7 @@ spec:
   type: ClusterIP
   ports:
     - name: books-post-endpoint
-      port: 80
+      port: 8080
       targetPort: 3030
       protocol: TCP
   selector:

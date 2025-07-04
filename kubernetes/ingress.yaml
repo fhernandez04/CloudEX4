@@ -3,31 +3,40 @@ kind: Ingress
 metadata:
   name: books-ingress
   annotations:
-    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/server-snippet: |
       location /api/books {
         if ($request_method = GET) {
-          proxy_pass http://books-get-service;
+          proxy_pass http://books-get-service:8080;
         }
         if ($request_method = POST) {
-          proxy_pass http://books-post-service;
+          proxy_pass http://books-post-service:8080;
         }
         if ($request_method = PUT) {
-          proxy_pass http://books-put-service;
+          proxy_pass http://books-put-service:8080;
         }
         if ($request_method = DELETE) {
-          proxy_pass http://books-delete-service;
+          proxy_pass http://books-delete-service:8080;
         }
       }
 spec:
+  ingressClassName: nginx
   rules:
   - http:
       paths:
-        # Frontend (HTML rendering)
+        # Redireccionar la raíz al frontend
         - path: /
           pathType: Prefix
           backend:
             service:
-              name: frontend-service
+              name: books-frontend-service
+              port:
+                number: 80
+
+        # Este path activa el bloque del server-snippet
+        - path: /api/books
+          pathType: Prefix
+          backend:
+            service:
+              name: dummy-service
               port:
                 number: 80
