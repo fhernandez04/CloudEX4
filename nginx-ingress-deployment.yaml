@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "6"
+    meta.helm.sh/release-name: nginx-ingress
+    meta.helm.sh/release-namespace: ingress-nginx
+  creationTimestamp: "2025-07-08T10:45:57Z"
+  generation: 6
+  labels:
+    app.kubernetes.io/instance: nginx-ingress
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: nginx-ingress
+    app.kubernetes.io/version: 3.5.2
+    helm.sh/chart: nginx-ingress-1.2.2
+  name: nginx-ingress-controller
+  namespace: ingress-nginx
+  resourceVersion: "39074"
+  uid: 1f29451f-21c5-47a5-a4d9-8455cbb20468
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: nginx-ingress
+      app.kubernetes.io/name: nginx-ingress
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/restartedAt: "2025-07-08T10:58:02Z"
+        prometheus.io/port: "9113"
+        prometheus.io/scheme: http
+        prometheus.io/scrape: "true"
+      creationTimestamp: null
+      labels:
+        app.kubernetes.io/instance: nginx-ingress
+        app.kubernetes.io/name: nginx-ingress
+    spec:
+      automountServiceAccountToken: true
+      containers:
+      - args:
+        - -nginx-plus=false
+        - -nginx-reload-timeout=60000
+        - -enable-app-protect=false
+        - -enable-app-protect-dos=false
+        - -nginx-configmaps=ingress-nginx/ingress-nginx-controller
+        - -ingress-class=nginx
+        - -health-status=false
+        - -health-status-uri=/nginx-health
+        - -nginx-debug=false
+        - -v=1
+        - -nginx-status=true
+        - -nginx-status-port=8080
+        - -nginx-status-allow-cidrs=127.0.0.1
+        - -report-ingress-status
+        - -external-service=nginx-ingress-controller
+        - -enable-leader-election=true
+        - -leader-election-lock-name=nginx-ingress-leader
+        - -enable-prometheus-metrics=true
+        - -prometheus-metrics-listen-port=9113
+        - -prometheus-tls-secret=
+        - -enable-service-insight=false
+        - -service-insight-listen-port=9114
+        - -service-insight-tls-secret=
+        - -enable-custom-resources=true
+        - -enable-snippets=false
+        - -include-year=false
+        - -disable-ipv6=false
+        - -enable-tls-passthrough=false
+        - -enable-cert-manager=false
+        - -enable-oidc=false
+        - -enable-external-dns=false
+        - -default-http-listener-port=80
+        - -default-https-listener-port=443
+        - -ready-status=true
+        - -ready-status-port=8081
+        - -enable-latency-metrics=false
+        - -ssl-dynamic-reload=true
+        - -enable-telemetry-reporting=true
+        - -weight-changes-dynamic-reload=false
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        image: nginx/nginx-ingress:3.5.2
+        imagePullPolicy: IfNotPresent
+        name: nginx-ingress
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 9113
+          name: prometheus
+          protocol: TCP
+        - containerPort: 8081
+          name: readiness-port
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /nginx-ready
+            port: readiness-port
+            scheme: HTTP
+          periodSeconds: 1
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 101
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      serviceAccount: nginx-ingress
+      serviceAccountName: nginx-ingress
+      terminationGracePeriodSeconds: 30
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2025-07-08T10:46:00Z"
+    lastUpdateTime: "2025-07-08T10:46:00Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2025-07-08T11:08:03Z"
+    lastUpdateTime: "2025-07-08T11:08:03Z"
+    message: ReplicaSet "nginx-ingress-controller-85994bccbb" has timed out progressing.
+    reason: ProgressDeadlineExceeded
+    status: "False"
+    type: Progressing
+  observedGeneration: 6
+  readyReplicas: 1
+  replicas: 2
+  unavailableReplicas: 1
+  updatedReplicas: 1

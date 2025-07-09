@@ -1,47 +1,46 @@
-apiVersion: v1
-kind: ConfigMap
+apiVersion: networking.k8s.io/v1
+kind: Ingress
 metadata:
-  name: nginx-templates
-  namespace: default
-data:
-  main-template: |
-    worker_processes {{.WorkerProcesses}};
-    events {
-      worker_connections {{.MaxWorkerConnections}};
-    }
-    http {
-      include /etc/nginx/mime.types;
-      default_type application/octet-stream;
-      sendfile on;
-      keepalive_timeout 65;
-      include /etc/nginx/conf.d/*.conf;
-    }
-  ingress-template: |
-    {{range $ingress := .Ingresses}}
-    {{range $rule := $ingress.Rules}}
-    server {
-      listen 80;
-      server_name {{$rule.Host}};
-      {{range $path := $rule.Paths}}
-      location {{$path.Path}} {
-        {{if eq $path.Path "/api/books"}}
-        if ($request_method = GET) {
-          proxy_pass http://books-get-service.default.svc.cluster.local:8080;
+  name: exercise-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/configuration-snippet: |
+      internal;
+      rewrite ^ $original_uri break;
+    nginx.org/server-snippets: |
+      
+      location ~ /api/books/(.*) {
+        if ($request_method = 'PUT') {
+          rewrite ^/(.*) /$1 break;
+          proxy_pass http://books-put-service:8080;
         }
-        if ($request_method = POST) {
-          proxy_pass http://books-post-service.default.svc.cluster.local:8080;
+        if ($request_method = 'DELETE') {
+          rewrite ^/(.*) /$1 break;
+          proxy_pass http://books-delete-service:8080;
         }
-        if ($request_method = PUT) {
-          proxy_pass http://books-put-service.default.svc.cluster.local:8080;
-        }
-        if ($request_method = DELETE) {
-          proxy_pass http://books-delete-service.default.svc.cluster.local:8080;
-        }
-        {{else}}
-        proxy_pass http://{{$path.Backend.ServiceName}}.{{$ingress.Namespace}}.svc.cluster.local:{{$path.Backend.ServicePort}};
-        {{end}}
       }
-      {{end}}
-    }
-    {{end}}
-    {{end}}
+      
+      location /api/books {
+        if ($request_method = 'GET') {
+          proxy_pass http://books-get-service:8080;
+        }
+        if ($request_method = 'POST') {
+          proxy_pass http://books-post-service:8080;
+        }
+      }
+      
+     
+
+spec:
+  rules:
+      - host: 20.54.81.54.nip.io
+        http:
+          paths:
+            - path: /
+              pathType: Exact
+              backend:
+                service:
+                  name: books-frontend-service
+                  port:
+                    number: 8080
+  ingressClassName: nginx
