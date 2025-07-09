@@ -4,10 +4,7 @@
 
 
 
-Dear students, 
-
-After batteling with Docker and Docker Compose for the last couple of weeks, it is
-time we level-up how we run our application. For this, we are gonna use a couple
+We are gonna use a couple
 of VMs to create a cluster using your Cloud provider and Kubernetes.
 
 > This exercise can be completed using one VM functioning as master and worker
@@ -54,22 +51,6 @@ kubectl proxy --address='0.0.0.0' --port=<port> --accept-hosts='^*$' &
 ```
 * You must open the `<port>` in your firewall rules
 * You must submit the K8s Proxy endpoint with the format `http://<endpoint>:<port>`
-
-#### Tests
-
-- 40% of the grade comes from:
-
-  1. Using an insolated MongoDB instance, the submission server will download, configure, and
-  run all of your images. (10 pts).
-  2. Using the isolated instance, the submission server will perform tests to the 
-  different available endpoints (45 pts).
-  3. Using your VM, the submission server will perform tests with the given endpoint
-  and check that you are running **NGINX** with proper configuration (45 pts). Please
-  make sure the port in the given port matches the exposed one for NGINX.
-
-- 60% of the grade comes from:
-  1. Using the K8s Proxy Endpoint, the submission server will query certain resource 
-  descriptions to seek for the resources specified in "The Challenge" section.
 
 ### Important Information
 
@@ -471,6 +452,8 @@ Upon deploying your resources, NGINX Ingress Controller, and Ingresses; you can 
 kubectl get pods -A
 ```
 
-and all pods should show `Running` as their status. If they are not like that, please reach me via Piazza.
+and all pods should show `Running` as their status.
 
-#### Happy Coding!
+Example of submission
+![image](https://github.com/user-attachments/assets/e2300352-9034-4fb8-a406-6046b5af85a1)
+
